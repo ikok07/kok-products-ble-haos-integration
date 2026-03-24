@@ -3,7 +3,8 @@ from homeassistant import config_entries
 from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, SelectSelector, SelectSelectorConfig, \
     SelectSelectorMode
 
-from .const import DOMAIN
+from models.device_entry import DeviceEntry, DeviceType
+from .const import DOMAIN, MANUFACTURER_ID
 import voluptuous as vol
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -34,8 +35,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 validated = user_input_schema(user_input)
-                self.discovery_info = next(device for device in available_devices if device.address == validated["device"])
-                return await self.async_step_device_confirm()
+                return await self.async_step_bluetooth(
+                    next(device for device in available_devices if device.address == validated["device"])
+                )
             except vol.Invalid as e:
                 errors["device"] = str(e.msg)
 
@@ -63,15 +65,27 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 validated = user_input_schema(user_input)
+
+                # Format (1 Byte - Device Type)
+                # Note: More data could be added in the future
+                manufacturer_data = self.discovery_info.manufacturer_data.get(MANUFACTURER_ID)
+                device_type: DeviceType | None = None
+
+                if manufacturer_data:
+                    device_type = DeviceType(manufacturer_data[0])
+
                 return self.async_create_entry(
                     title=self.discovery_info.name,
-                    data={
-                        "name": validated["device_name"],
-                        "address": self.discovery_info.address
-                    }
+                    data=DeviceEntry(
+                        name=validated["device_name"],
+                        address=self.discovery_info.address,
+                        device_type=device_type if device_type else None
+                    ).model_dump()
                 )
-            except vol.Invalid as e:
-                errors["device_name"] = str(e.msg)
+            except vol.MultipleInvalid as e:
+                for error in e.errors:
+                    field = str(error.path[0]) if error.path else "base"
+                    errors[field] = str(error.msg)
 
         return self.async_show_form(
             step_id="device_confirm",
