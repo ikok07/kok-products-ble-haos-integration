@@ -1,0 +1,3 @@
+DOMAIN="kok_products_ble"
+PLATFORM_LIGHT="switch"
+PLATFORM_SERVICE_UUID="88c85bc1-feec-4c35-aa49-74ae36355165"
