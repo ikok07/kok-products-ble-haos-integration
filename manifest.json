@@ -1,4 +1,5 @@
 {
+  "version": "0.0.1",
   "domain": "kok_products_ble",
   "name": "KOK BLE Products",
   "codeowners": ["@ikok07"],

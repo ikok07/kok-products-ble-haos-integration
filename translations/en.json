@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Select BLE device",
+        "description": "Choose a device from the list",
+        "data": {
+            "device": "Device"
+        }
+      },
+      "device_confirm": {
+        "title": "Confirm BLE device connection",
+        "description": "Found device **{device_name}** with MAC address **{device_address}**. Enter a name for it:",
+        "data": {
+          "device_name": "Device Name"
+        },
+        "data_description": {
+          "device_name": "A friendly name to identify your device in Home Assistant"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Device is already configured!",
+      "no_devices_found": "There are no BLE devices found!"
+    }
+  }
+}

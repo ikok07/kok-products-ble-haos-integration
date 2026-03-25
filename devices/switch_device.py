@@ -14,7 +14,7 @@ class SwitchDevice(SwitchEntity):
         self.coordinator = coordinator
         self.should_poll = should_poll
         self._attr_unique_id = f"{coordinator.address}_switch"
-        self._attr_device_info = DeviceInfo(name=coordinator.name, identifiers={{DOMAIN, coordinator.address}})
+        self._attr_device_info = DeviceInfo(name=coordinator.name, identifiers={(DOMAIN, coordinator.address)})
         self._attr_icon = "mdi:toggle-switch-outline"
 
     async def turn_on(self, **kwargs):
