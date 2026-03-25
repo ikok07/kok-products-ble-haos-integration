@@ -51,4 +51,4 @@ class SwitchDevice(SwitchEntity):
         if cb_type == CoordinatorCallbackType.NOTIFICATION and char.uuid == self._SWITCH_CHARACTERISTIC:
             self._attr_is_on = bool(data[0])
             self.coordinator.fire_event({"state": self._attr_is_on})
-            asyncio.run(self.async_schedule_update_ha_state)
+            asyncio.ensure_future(self.async_schedule_update_ha_state)
