@@ -21,13 +21,14 @@ class DeviceCoordinator(DataUpdateCoordinator):
         self._client: BleakClient | None = None
         self._callbacks: list[CoordinatorCallback] = []
 
-    async def connect(self) -> bool:
+    async def connect(self, requires_pairing: bool = False) -> bool:
         self._client = BleakClient(
             self.address,
             disconnected_callback=self._on_disconnected
         )
         await self._client.connect()
-        await self._client.pair()
+        if requires_pairing:
+            await self._client.pair()
 
         self.last_update_success = True
 

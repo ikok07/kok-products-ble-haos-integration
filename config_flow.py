@@ -4,7 +4,7 @@ from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, Sel
     SelectSelectorMode
 import voluptuous as vol
 
-from .models.device_entry import DeviceEntry, DeviceType
+from .models.device_entry import DeviceEntryData, DeviceType
 from .const import DOMAIN, MANUFACTURER_ID, IDENTIFIER_SERVICE_UUID
 
 
@@ -80,16 +80,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # Note: More data could be added in the future
                 manufacturer_data = self.discovery_info.manufacturer_data.get(MANUFACTURER_ID)
                 device_type: DeviceType | None = None
+                requires_pairing: bool = False
 
                 if manufacturer_data:
                     device_type = DeviceType(manufacturer_data[0])
+                    requires_pairing = bool(manufacturer_data[1]) if len(manufacturer_data) > 1 else False
 
                 return self.async_create_entry(
                     title=self.discovery_info.name,
-                    data=DeviceEntry(
+                    data=DeviceEntryData(
                         name=validated["device_name"],
                         address=self.discovery_info.address,
-                        device_type=device_type if device_type else None
+                        device_type=device_type if device_type else None,
+                        requires_pairing=requires_pairing
                     ).model_dump(mode="json")
                 )
             except vol.MultipleInvalid as e:
