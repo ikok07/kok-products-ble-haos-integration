@@ -15,7 +15,7 @@
           "device_name": "Device Name"
         },
         "data_description": {
-          "device_name": "A friendly name to identify your device in Home Assistant",
+          "device_name": "A friendly name to identify your device in Home Assistant"
         }
       }
     },

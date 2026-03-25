@@ -6,7 +6,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from const import DOMAIN
 from coordinator import DeviceCoordinator
-from devices.SwitchDevice import SwitchDevice
+from devices.switch_device import SwitchDevice
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> bool:

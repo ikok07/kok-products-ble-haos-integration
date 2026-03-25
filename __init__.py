@@ -1,10 +1,11 @@
 from typing import cast
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, DOMAIN
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from coordinator import DeviceCoordinator
-from models.device_entry import DeviceEntry, DeviceType
+from .const import DOMAIN
+from .coordinator import DeviceCoordinator
+from .models.device_entry import DeviceEntry, DeviceType
 
 platforms_map: dict[DeviceType, list[str]] = {
     DeviceType.SWITCH: ["switch"]

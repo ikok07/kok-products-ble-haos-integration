@@ -2,10 +2,10 @@ from homeassistant.components.bluetooth import BluetoothServiceInfoBleak, async_
 from homeassistant import config_entries
 from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, SelectSelector, SelectSelectorConfig, \
     SelectSelectorMode
-
-from models.device_entry import DeviceEntry, DeviceType
-from .const import DOMAIN, MANUFACTURER_ID
 import voluptuous as vol
+
+from .models.device_entry import DeviceEntry, DeviceType
+from .const import DOMAIN, MANUFACTURER_ID
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
