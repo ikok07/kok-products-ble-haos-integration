@@ -52,11 +52,6 @@ class SwitchDevice(SwitchEntity):
     def _on_ble_notification(self, cb_type: CoordinatorCallbackType, char: BleakGATTCharacteristic, data: bytearray):
         _LOGGER.debug("Switch device received BLE notification. Characteristic: %s, Data: %s. (%s:%s)", char, data.hex(), self.coordinator.name, self.coordinator.address)
         if cb_type == CoordinatorCallbackType.NOTIFICATION and char.uuid == self._SWITCH_CHARACTERISTIC:
-
-            if bool(data[0]):
-                asyncio.ensure_future(self.turn_on())
-            else:
-                asyncio.ensure_future(self.turn_off())
-
+            self._attr_is_on = bool(data[0])
             self.coordinator.fire_event({"state": self._attr_is_on})
             self.async_schedule_update_ha_state()
