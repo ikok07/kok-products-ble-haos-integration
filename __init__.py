@@ -10,6 +10,8 @@ platforms_map: dict[DeviceType, list[str]] = {
     DeviceType.SWITCH: ["switch"]
 }
 
+# TODO: Fix paring issue
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         device_entry_data = DeviceEntryData.model_validate(dict(entry.data))

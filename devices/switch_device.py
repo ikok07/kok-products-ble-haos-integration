@@ -1,5 +1,4 @@
 import asyncio
-from typing import cast
 
 from bleak import BleakGATTCharacteristic, normalize_uuid_str
 from homeassistant.components.switch import SwitchEntity, SwitchDeviceClass
@@ -23,12 +22,10 @@ class SwitchDevice(SwitchEntity):
     async def turn_on(self, **kwargs):
         _LOGGER.debug("Switch device turned on. (%s:%s)", self.coordinator.name, self.coordinator.address)
         await self.coordinator.write_char(self._SWITCH_CHARACTERISTIC, bytes([0x01]))
-        self._attr_is_on = True
 
     async def turn_off(self, **kwargs):
         _LOGGER.debug("Switch device turned off. (%s:%s)", self.coordinator.name, self.coordinator.address)
         await self.coordinator.write_char(self._SWITCH_CHARACTERISTIC, bytes([0x00]))
-        self._attr_is_on = False
 
     async def async_added_to_hass(self):
         self._notification_cb = self._on_ble_notification
@@ -54,4 +51,4 @@ class SwitchDevice(SwitchEntity):
         if cb_type == CoordinatorCallbackType.NOTIFICATION and char.uuid == self._SWITCH_CHARACTERISTIC:
             self._attr_is_on = bool(data[0])
             self.coordinator.fire_event({"state": self._attr_is_on})
-            self.async_schedule_update_ha_state()
+            asyncio.run(self.async_schedule_update_ha_state)
