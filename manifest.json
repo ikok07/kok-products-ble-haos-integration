@@ -1,10 +1,10 @@
 {
   "version": "0.0.1",
   "domain": "kok_products_ble",
-  "name": "KOK BLE Products",
+  "name": "KOK Products BLE",
   "codeowners": ["@ikok07"],
   "dependencies": ["bluetooth", "bluetooth_adapters"],
-  "documentation": "https://www.example.com",
+  "documentation": "https://github.com/ikok07/kok-products-ble-haos-integration.git",
   "integration_type": "hub",
   "iot_class": "local_push",
   "requirements": [],
