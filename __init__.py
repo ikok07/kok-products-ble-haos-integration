@@ -1,4 +1,3 @@
-from typing import cast
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -12,7 +11,11 @@ platforms_map: dict[DeviceType, list[str]] = {
 }
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    device_entry = cast(DeviceEntry, entry.data)
+    try:
+        device_entry = DeviceEntry.model_validate(dict(entry.data))
+    except Exception as err:
+        raise ConfigEntryNotReady(f"Invalid entry data: {err}") from err
+
     coordinator = DeviceCoordinator(hass, name=device_entry.name, address=device_entry.address)
     await coordinator.connect()
 

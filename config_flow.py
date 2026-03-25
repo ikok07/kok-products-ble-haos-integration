@@ -90,7 +90,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         name=validated["device_name"],
                         address=self.discovery_info.address,
                         device_type=device_type if device_type else None
-                    ).model_dump()
+                    ).model_dump(mode="json")
                 )
             except vol.MultipleInvalid as e:
                 for error in e.errors:
