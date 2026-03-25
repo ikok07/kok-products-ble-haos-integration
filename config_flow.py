@@ -5,7 +5,8 @@ from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, Sel
 import voluptuous as vol
 
 from .models.device_entry import DeviceEntry, DeviceType
-from .const import DOMAIN, MANUFACTURER_ID
+from .const import DOMAIN, MANUFACTURER_ID, IDENTIFIER_SERVICE_UUID
+
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -25,7 +26,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("device"): SelectSelector(
                 SelectSelectorConfig(
                     options=[
-                        {"value": device.address, "label": device.name} for device in available_devices
+                        {"value": device.address, "label": device.name} for device in available_devices if IDENTIFIER_SERVICE_UUID in device.advertisement.service_uuids
                     ],
                     mode=SelectSelectorMode.DROPDOWN
                 )
