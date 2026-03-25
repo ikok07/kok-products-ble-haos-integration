@@ -22,16 +22,33 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if not available_devices:
             return self.async_abort(reason="no_devices_found")
 
-        user_input_schema = vol.Schema({
-            vol.Required("device"): SelectSelector(
+        options =  \
+            [
+                    {"value": device.address, "label": device.name or device.address}
+                    for device in available_devices
+                    if device.advertisement is not None
+                        and IDENTIFIER_SERVICE_UUID in device.advertisement.service_uuids
+            ]
+
+        if not options:
+            user_input_schema = vol.Schema({
+                vol.Required("test"): SelectSelector(
                 SelectSelectorConfig(
-                    options=[
-                        {"value": device.address, "label": device.name} for device in available_devices if IDENTIFIER_SERVICE_UUID in device.advertisement.service_uuids
-                    ],
+                    options=[str.join(',', device.advertisement.service_uuids) for device in available_devices],
                     mode=SelectSelectorMode.DROPDOWN
                 )
             )
-        })
+            })
+            # return self.async_abort(reason="no_compatible_devices_found")
+        else:
+            user_input_schema = vol.Schema({
+                vol.Required("device"): SelectSelector(
+                    SelectSelectorConfig(
+                        options=options,
+                        mode=SelectSelectorMode.DROPDOWN
+                    )
+                )
+            })
 
         if user_input is not None:
             try:

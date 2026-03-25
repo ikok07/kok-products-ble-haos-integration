@@ -21,7 +21,8 @@
     },
     "abort": {
       "already_configured": "Device is already configured!",
-      "no_devices_found": "There are no BLE devices found!"
+      "no_devices_found": "There are no BLE devices found!",
+      "no_compatible_devices_found": "There are BLE devices found, but none of them is compatible with this integration!"
     }
   }
 }
