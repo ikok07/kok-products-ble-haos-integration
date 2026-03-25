@@ -58,8 +58,18 @@ class DeviceCoordinator(DataUpdateCoordinator):
         self.async_update_listeners()
 
     async def subscribe_char(self, char: BleakGATTCharacteristic | str):
-        await self._client.start_notify(char, self._on_notification)
-        _LOGGER.debug("Subscribed to characteristic... Characteristic: %s. (%s:%s)", char, self.name, self.address)
+        try:
+            await self._client.start_notify(char, self._on_notification)
+            _LOGGER.debug("Subscribed to characteristic... Characteristic: %s. (%s:%s)", char, self.name, self.address)
+        except Exception as e:
+            _LOGGER.error("Failed to subscribe to %s: %s", char, e)
+
+    async def unsubscribe_char(self, char: BleakGATTCharacteristic | str):
+        try:
+            await self._client.stop_notify(char)
+            _LOGGER.debug("Unsubscribed to characteristic... Characteristic: %s. (%s:%s)", char, self.name, self.address)
+        except Exception as e:
+            _LOGGER.debug("Failed to unsubscribe from %s (may not be subscribed): %s", char, e)
 
     async def read_char(self, char: BleakGATTCharacteristic | str) -> bytearray:
         data = await self._client.read_gatt_char(char)

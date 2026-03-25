@@ -1,5 +1,3 @@
-import asyncio
-
 from bleak import BleakGATTCharacteristic, normalize_uuid_str
 from homeassistant.components.switch import SwitchEntity, SwitchDeviceClass
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -19,11 +17,11 @@ class SwitchDevice(SwitchEntity):
         self._attr_device_info = DeviceInfo(name=coordinator.name, identifiers={(DOMAIN, coordinator.address)})
         self._attr_icon = "mdi:toggle-switch-outline"
 
-    async def turn_on(self, **kwargs):
+    async def async_turn_on(self, **kwargs):
         _LOGGER.debug("Switch device turned on. (%s:%s)", self.coordinator.name, self.coordinator.address)
         await self.coordinator.write_char(self._SWITCH_CHARACTERISTIC, bytes([0x01]))
 
-    async def turn_off(self, **kwargs):
+    async def async_turn_off(self, **kwargs):
         _LOGGER.debug("Switch device turned off. (%s:%s)", self.coordinator.name, self.coordinator.address)
         await self.coordinator.write_char(self._SWITCH_CHARACTERISTIC, bytes([0x00]))
 
@@ -31,18 +29,25 @@ class SwitchDevice(SwitchEntity):
         self._notification_cb = self._on_ble_notification
         self.coordinator.register_callback(self._notification_cb)
 
+        # Remove active subscriptions to prevent overloading
+        try:
+            await self.coordinator.unsubscribe_char(self._SWITCH_CHARACTERISTIC)
+        except:
+            pass
+
         await self.coordinator.subscribe_char(self._SWITCH_CHARACTERISTIC)
 
         data = await self.coordinator.read_char(self._SWITCH_CHARACTERISTIC)
-
-        if bool(data[0]):
-            await self.turn_on()
-        else:
-            await self.turn_off()
+        self._attr_is_on = bool(data[0])
 
         _LOGGER.debug("Switch device added to hass. (%s:%s)", self.coordinator.name, self.coordinator.address)
 
     async def async_will_remove_from_hass(self):
+        try:
+            await self.coordinator.unsubscribe_char(self._SWITCH_CHARACTERISTIC)
+        except:
+            pass
+
         self.coordinator.unregister_callback(self._notification_cb)
         _LOGGER.debug("Switch device removed from hass. (%s:%s)", self.coordinator.name, self.coordinator.address)
 
@@ -51,4 +56,4 @@ class SwitchDevice(SwitchEntity):
         if cb_type == CoordinatorCallbackType.NOTIFICATION and char.uuid == self._SWITCH_CHARACTERISTIC:
             self._attr_is_on = bool(data[0])
             self.coordinator.fire_event({"state": self._attr_is_on})
-            asyncio.ensure_future(self.async_schedule_update_ha_state)
+            self.async_write_ha_state()
