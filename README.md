@@ -1,3 +1,5 @@
+![KOK Products BLE Logo](https://github.com/ikok07/kok-products-ble-haos-integration/blob/main/brand/icon.png?raw=true)
+
 # KOK BLE Products — Home Assistant Integration
 
 A custom [Home Assistant](https://www.home-assistant.io/) integration for personal embedded devices that communicate over **Bluetooth Low Energy (BLE)**. It enables discovery, pairing, and control of supported KOK devices directly from the Home Assistant UI.
