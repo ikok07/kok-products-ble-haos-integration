@@ -4,7 +4,6 @@ from typing import Callable
 
 from bleak import BleakClient, BleakGATTCharacteristic
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import Entity
 
 _LOGGER = logging.getLogger(__name__)
 

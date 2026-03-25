@@ -2,8 +2,8 @@ from bleak import BleakGATTCharacteristic, normalize_uuid_16
 from homeassistant.components.switch import SwitchEntity, SwitchDeviceClass
 from homeassistant.helpers.device_registry import DeviceInfo
 
-from const import DOMAIN
-from coordinator import CoordinatorCallbackType, DeviceCoordinator
+from ..const import DOMAIN
+from ..coordinator import CoordinatorCallbackType, DeviceCoordinator
 
 class SwitchDevice(SwitchEntity):
     _SWITCH_CHARACTERISTIC = normalize_uuid_16(0x2A56)                             # Bluetooth Digital Characteristic (from Automation Service [0x1815] )

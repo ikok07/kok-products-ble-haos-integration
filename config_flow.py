@@ -15,7 +15,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         discovered = async_discovered_service_info(self.hass, connectable=True)
-        configured_addresses = [entry["address"] for entry in self._async_current_entries()]
+        configured_addresses = [entry.data["address"] for entry in self._async_current_entries()]
 
         available_devices = [device for device in discovered if device.address not in configured_addresses]
         if not available_devices:
