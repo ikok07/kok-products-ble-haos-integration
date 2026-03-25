@@ -31,24 +31,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ]
 
         if not options:
-            user_input_schema = vol.Schema({
-                vol.Required("test"): SelectSelector(
+            return self.async_abort(reason="no_compatible_devices_found")
+
+        user_input_schema = vol.Schema({
+            vol.Required("device"): SelectSelector(
                 SelectSelectorConfig(
-                    options=[str.join(',', device.advertisement.service_uuids) for device in available_devices],
+                    options=options,
                     mode=SelectSelectorMode.DROPDOWN
                 )
             )
-            })
-            # return self.async_abort(reason="no_compatible_devices_found")
-        else:
-            user_input_schema = vol.Schema({
-                vol.Required("device"): SelectSelector(
-                    SelectSelectorConfig(
-                        options=options,
-                        mode=SelectSelectorMode.DROPDOWN
-                    )
-                )
-            })
+        })
 
         if user_input is not None:
             try:
