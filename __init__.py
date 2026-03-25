@@ -3,7 +3,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from .const import DOMAIN
+from .const import DOMAIN, _LOGGER
 from .coordinator import DeviceCoordinator
 from .models.device_entry import DeviceEntry, DeviceType
 
@@ -25,6 +25,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     if not device_entry.device_type in platforms_map:
         raise ConfigEntryNotReady(f"Unsupported device type '{device_entry.device_type}'!")
+
+    _LOGGER.debug("Device coordinator created. Device name: %s", device_entry.name)
 
     await hass.config_entries.async_forward_entry_setups(entry, platforms_map.get(device_entry.device_type))
 

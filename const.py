@@ -1,3 +1,10 @@
+import logging
+
 DOMAIN="kok_products_ble"
 MANUFACTURER_ID=0x4862
 PLATFORM_SERVICE_UUID="88c85bc1-feec-4c35-aa49-74ae36355165"
+
+MAX_RECONNECT_ATTEMPTS=5
+RECONNECT_DELAY_SECONDS=5
+
+_LOGGER = logging.getLogger(__name__)
