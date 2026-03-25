@@ -1,5 +1,8 @@
+from typing import cast
+
 from bleak import BleakGATTCharacteristic, normalize_uuid_16
 from homeassistant.components.switch import SwitchEntity, SwitchDeviceClass
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from ..const import DOMAIN, _LOGGER
@@ -43,4 +46,5 @@ class SwitchDevice(SwitchEntity):
         _LOGGER.debug("Switch device received BLE notification. Characteristic: %s, Data: %s. (%s:%s)", char, data.hex(), self.coordinator.name, self.coordinator.address)
         if cb_type == CoordinatorCallbackType.NOTIFICATION and char.uuid == self._SWITCH_CHARACTERISTIC:
             self._attr_is_on = bool(data[0])
+            self.coordinator.fire_event({"state": self._attr_is_on})
             self.async_schedule_update_ha_state()

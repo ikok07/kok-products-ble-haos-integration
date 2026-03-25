@@ -1,12 +1,12 @@
 import asyncio
 from enum import Enum
-from typing import Callable
+from typing import Callable, cast
 
 from bleak import BleakClient, BleakGATTCharacteristic, BleakError
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import _LOGGER, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY_SECONDS
+from .const import _LOGGER, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY_SECONDS, DOMAIN
 
 
 class CoordinatorCallbackType(Enum):
@@ -16,9 +16,7 @@ CoordinatorCallback = Callable[[CoordinatorCallbackType, BleakGATTCharacteristic
 
 class DeviceCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, name: str, address: str):
-        super.__init__(hass, _LOGGER)
-        self.hass = hass
-        self.name = name
+        super().__init__(hass, _LOGGER, name=name)
         self.address = address
         self._client: BleakClient | None = None
         self._callbacks: list[CoordinatorCallback] = []
@@ -76,6 +74,9 @@ class DeviceCoordinator(DataUpdateCoordinator):
 
     def unregister_callback(self, callback: CoordinatorCallback):
         self._callbacks.remove(callback)
+
+    def fire_event(self, event_data: any):
+        self.hass.bus.async_fire(f"{DOMAIN}_event", {"device_id": self.address, **event_data})
 
     def _on_notification(self, sender: BleakGATTCharacteristic, data: bytearray):
         for callback in self._callbacks:
