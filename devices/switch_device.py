@@ -50,8 +50,8 @@ class SwitchDevice(SwitchEntity):
         self.coordinator.unregister_callback(self._event_cb)
         _LOGGER.debug("Switch device removed from hass. (%s:%s)", self.coordinator.name, self.coordinator.address)
 
-    def _on_event(self, cb_type: CoordinatorCallbackType, attr: str, data: bytearray):
-        _LOGGER.debug("Switch device received an event. Type: %s, Attribute: %s, Data: %s. (%s:%s)", cb_type, attr, data.hex(), self.coordinator.name, self.coordinator.address)
+    def _on_event(self, cb_type: CoordinatorCallbackType, attr: str | None, data: bytearray | None):
+        _LOGGER.debug("Switch device received an event. Type: %s, Attribute: %s, Data: %s. (%s:%s)", cb_type, attr if attr else None, data.hex() if data else None, self.coordinator.name, self.coordinator.address)
         match cb_type:
             case CoordinatorCallbackType.NOTIFICATION:
                 if attr == self._SWITCH_CHARACTERISTIC:
