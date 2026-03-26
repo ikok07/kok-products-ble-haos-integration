@@ -1,4 +1,4 @@
-from bleak import BleakGATTCharacteristic, normalize_uuid_str
+from bleak import normalize_uuid_str
 from homeassistant.components.switch import SwitchEntity, SwitchDeviceClass
 from homeassistant.helpers.device_registry import DeviceInfo
 
@@ -8,7 +8,7 @@ from ..coordinator import CoordinatorCallbackType, DeviceCoordinator
 class SwitchDevice(SwitchEntity):
     _SWITCH_CHARACTERISTIC = normalize_uuid_str("2A56")                             # Bluetooth Digital Characteristic (from Automation Service [0x1815] )
     _attr_device_class = SwitchDeviceClass.SWITCH
-    _notification_cb: callable
+    _event_cb: callable
 
     def __init__(self, coordinator: DeviceCoordinator, should_poll: bool = True):
         self.coordinator = coordinator
@@ -26,8 +26,8 @@ class SwitchDevice(SwitchEntity):
         await self.coordinator.write_char(self._SWITCH_CHARACTERISTIC, bytes([0x00]))
 
     async def async_added_to_hass(self):
-        self._notification_cb = self._on_ble_notification
-        self.coordinator.register_callback(self._notification_cb)
+        self._event_cb = self._on_event
+        self.coordinator.register_callback(self._event_cb)
 
         # Remove active subscriptions to prevent overloading
         try:
@@ -37,8 +37,7 @@ class SwitchDevice(SwitchEntity):
 
         await self.coordinator.subscribe_char(self._SWITCH_CHARACTERISTIC)
 
-        data = await self.coordinator.read_char(self._SWITCH_CHARACTERISTIC)
-        self._attr_is_on = bool(data[0])
+        await self._pull_latest_state()
 
         _LOGGER.debug("Switch device added to hass. (%s:%s)", self.coordinator.name, self.coordinator.address)
 
@@ -48,12 +47,35 @@ class SwitchDevice(SwitchEntity):
         except:
             pass
 
-        self.coordinator.unregister_callback(self._notification_cb)
+        self.coordinator.unregister_callback(self._event_cb)
         _LOGGER.debug("Switch device removed from hass. (%s:%s)", self.coordinator.name, self.coordinator.address)
 
-    def _on_ble_notification(self, cb_type: CoordinatorCallbackType, char: BleakGATTCharacteristic, data: bytearray):
-        _LOGGER.debug("Switch device received BLE notification. Characteristic: %s, Data: %s. (%s:%s)", char, data.hex(), self.coordinator.name, self.coordinator.address)
-        if cb_type == CoordinatorCallbackType.NOTIFICATION and char.uuid == self._SWITCH_CHARACTERISTIC:
+    def _on_event(self, cb_type: CoordinatorCallbackType, attr: str, data: bytearray):
+        _LOGGER.debug("Switch device received an event. Type: %s, Attribute: %s, Data: %s. (%s:%s)", cb_type, attr, data.hex(), self.coordinator.name, self.coordinator.address)
+        match cb_type:
+            case CoordinatorCallbackType.NOTIFICATION:
+                if attr == self._SWITCH_CHARACTERISTIC:
+                    self._attr_is_on = bool(data[0])
+                    self._attr_available = True
+                    self.coordinator.fire_event({"state": self._attr_is_on})
+                    self.async_write_ha_state()
+                return
+            case CoordinatorCallbackType.RECONNECT:
+                self._attr_available = True
+                self.hass.async_create_task(self._pull_latest_state())
+                self.async_write_ha_state()
+                return
+            case CoordinatorCallbackType.DISCONNECT:
+                self._attr_available = False
+                self.async_write_ha_state()
+                return
+
+    async def _pull_latest_state(self) -> bool:
+        try:
+            data = await self.coordinator.read_char(self._SWITCH_CHARACTERISTIC)
             self._attr_is_on = bool(data[0])
-            self.coordinator.fire_event({"state": self._attr_is_on})
             self.async_write_ha_state()
+            return True
+        except Exception as e:
+            _LOGGER.warning("Failed to pull latest device state: %s", e)
+            return False

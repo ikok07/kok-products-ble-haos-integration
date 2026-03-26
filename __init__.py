@@ -33,3 +33,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, DEVICE_TYPE_PLATFORMS_MAP.get(device_entry_data.device_type))
 
     return True
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    _LOGGER.debug("Entry %s has been removed!", entry.entry_id)
+
+    coordinator: DeviceCoordinator | None = hass.data[DOMAIN][entry.entry_id]
+    if coordinator:
+        try:
+            await coordinator.disconnect()
+            _LOGGER.debug("Coordinator disconnected successfully! (%s:%s)", coordinator.name, coordinator.address)
+        except Exception as e:
+            _LOGGER.warning("Failed to disconnect coordinator after removing entry! (%s:%s)", coordinator.name, coordinator.address)
+
+        hass.data[DOMAIN].pop(entry.entry_id)
