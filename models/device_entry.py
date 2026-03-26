@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from .models.device_type import DeviceType
+from .device_type import DeviceType
 
 class DeviceEntryData(BaseModel):
     name: str
