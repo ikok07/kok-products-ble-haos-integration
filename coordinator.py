@@ -7,7 +7,7 @@ from bleak_retry_connector import establish_connection, BleakClientWithServiceCa
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import _LOGGER, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY_SECONDS, DOMAIN
+from .const import _LOGGER, MAX_RECONNECT_ATTEMPTS, DOMAIN
 
 class CoordinatorCallbackType(Enum):
     NOTIFICATION = "notification"
