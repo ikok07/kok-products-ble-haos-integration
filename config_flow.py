@@ -82,6 +82,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 device_type: DeviceType | None = None
                 requires_pairing: bool = False
 
+                _LOGGER.debug("Device type: %s; Requires pairing: %s", device_type, "true" if requires_pairing else "false")
+
                 if manufacturer_data:
                     try:
                         device_type = DeviceType(manufacturer_data[0])
