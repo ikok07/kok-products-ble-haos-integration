@@ -7,7 +7,7 @@ from .const import DOMAIN, _LOGGER
 from .coordinator import DeviceCoordinator
 from .models.device_entry import DeviceEntryData
 
-# TODO: Fix paring issue
+# Suggested BLE adapter - UGREEN CM109
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:

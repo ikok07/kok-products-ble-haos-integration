@@ -4,7 +4,7 @@ from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, Sel
     SelectSelectorMode
 import voluptuous as vol
 
-from models.device_type import DeviceType
+from .models.device_type import DeviceType
 from .models.device_entry import DeviceEntryData
 from .const import DOMAIN, MANUFACTURER_ID, IDENTIFIER_SERVICE_UUID, _LOGGER
 
