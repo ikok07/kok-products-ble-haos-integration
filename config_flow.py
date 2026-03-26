@@ -4,8 +4,9 @@ from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, Sel
     SelectSelectorMode
 import voluptuous as vol
 
-from .models.device_entry import DeviceEntryData, DeviceType
-from .const import DOMAIN, MANUFACTURER_ID, IDENTIFIER_SERVICE_UUID
+from models.device_type import DeviceType
+from .models.device_entry import DeviceEntryData
+from .const import DOMAIN, MANUFACTURER_ID, IDENTIFIER_SERVICE_UUID, _LOGGER
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -76,14 +77,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 validated = user_input_schema(user_input)
 
-                # Format (1 Byte - Device Type)
+                # Format (1 Byte - Device Type, 2 Byte - Whether device requires pairing)
                 # Note: More data could be added in the future
                 manufacturer_data = self.discovery_info.manufacturer_data.get(MANUFACTURER_ID)
                 device_type: DeviceType | None = None
                 requires_pairing: bool = False
 
                 if manufacturer_data:
-                    device_type = DeviceType(manufacturer_data[0])
+                    try:
+                        device_type = DeviceType(manufacturer_data[0])
+                    except ValueError as e:
+                        self.async_abort(reason="unsupported_device_type", description_placeholders={"device_type": f"{manufacturer_data[0]:#04X}"})
+
                     requires_pairing = bool(manufacturer_data[1]) if len(manufacturer_data) > 1 else False
 
                 return self.async_create_entry(

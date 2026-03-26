@@ -2,12 +2,13 @@ import asyncio
 from enum import Enum
 from typing import Callable, cast
 
-from bleak import BleakClient, BleakGATTCharacteristic, BleakError
+from bleak import BleakClient, BleakGATTCharacteristic, BleakError, BleakScanner
+from bleak_retry_connector import establish_connection, BleakClientWithServiceCache, BleakNotFoundError, \
+    BleakOutOfConnectionSlotsError, BleakConnectionError
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import _LOGGER, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY_SECONDS, DOMAIN
-
 
 class CoordinatorCallbackType(Enum):
     NOTIFICATION = "notification"
@@ -22,11 +23,26 @@ class DeviceCoordinator(DataUpdateCoordinator):
         self._callbacks: list[CoordinatorCallback] = []
 
     async def connect(self, requires_pairing: bool = False) -> bool:
-        self._client = BleakClient(
-            self.address,
-            disconnected_callback=self._on_disconnected
-        )
-        await self._client.connect()
+        device = await BleakScanner.find_device_by_address(self.address)
+        if not device:
+            _LOGGER.error("Device not found! (%s:%s)", self.name, self.address)
+            return False
+
+        try:
+            self._client = await establish_connection(
+                client_class=BleakClient,
+                device=device,
+                name=self.name,
+                max_attempts=MAX_RECONNECT_ATTEMPTS,
+                disconnected_callback=self._on_disconnected
+            )
+        except BleakNotFoundError:
+            _LOGGER.error("Device not found! (%s:%s)", self.name, self.address)
+        except BleakOutOfConnectionSlotsError:
+            _LOGGER.error("No connection slots available - try disconnecting other devices!")
+        except BleakConnectionError:
+            _LOGGER.error("Connection failed! (%s:%s)", self.name, self.address)
+
         if requires_pairing:
             await self._client.pair()
 
@@ -39,23 +55,6 @@ class DeviceCoordinator(DataUpdateCoordinator):
     async def disconnect(self):
         if self._client:
             await self._client.disconnect()
-
-    async def reconnect(self):
-        _LOGGER.warning("Reconnecting device. (%s:%s)", self.name, self.address)
-        for attempt in range(1, MAX_RECONNECT_ATTEMPTS + 1):
-            _LOGGER.warning("Attempt: %d/%d. (%s:%s)", attempt, MAX_RECONNECT_ATTEMPTS, self.name, self.address)
-            try:
-                await self.connect()
-                return
-            except (BleakError, asyncio.TimeoutError) as e:
-                _LOGGER.warning("Reconnect attempt %d failed. (%s:%s)", attempt, self.name, self.address)
-                if attempt < MAX_RECONNECT_ATTEMPTS:
-                    await asyncio.sleep(RECONNECT_DELAY_SECONDS * attempt)
-                pass
-
-        _LOGGER.error("Failed to reconnect to device. (%s:%s)", self.name, self.address)
-        self.last_update_success = False
-        self.async_update_listeners()
 
     async def subscribe_char(self, char: BleakGATTCharacteristic | str):
         try:
@@ -95,4 +94,3 @@ class DeviceCoordinator(DataUpdateCoordinator):
 
     def _on_disconnected(self, client: BleakClient):
         _LOGGER.info("Device disconnected (%s:%s)", self.name, self.address)
-        asyncio.ensure_future(self.reconnect())

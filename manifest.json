@@ -7,13 +7,12 @@
   "documentation": "https://github.com/ikok07/kok-products-ble-haos-integration.git",
   "integration_type": "device",
   "iot_class": "local_push",
-  "requirements": [],
+  "requirements": ["bleak-retry-connector"],
   "loggers": ["kok_products_ble"],
   "config_flow": true,
   "bluetooth": [
     {
-      "connectable": true,
-      "service_uuid": "88c85bc1-feec-4c35-aa49-74ae36355165"
+      "service_uuid": "65513536-ae74-49aa-354c-ecfec15bc888"
     }
   ]
 }

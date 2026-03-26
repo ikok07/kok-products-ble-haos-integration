@@ -1,9 +1,6 @@
-from enum import Enum
-
 from pydantic import BaseModel
 
-class DeviceType(Enum):
-    SWITCH = 1
+from models.device_type import DeviceType
 
 class DeviceEntryData(BaseModel):
     name: str
