@@ -2,7 +2,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from models.device_type import DEVICE_TYPE_PLATFORMS_MAP
+from .models.device_type import DEVICE_TYPE_PLATFORMS_MAP
 from .const import DOMAIN, _LOGGER
 from .coordinator import DeviceCoordinator
 from .models.device_entry import DeviceEntryData

@@ -8,7 +8,6 @@ from .models.device_type import DeviceType
 from .models.device_entry import DeviceEntryData
 from .const import DOMAIN, MANUFACTURER_ID, IDENTIFIER_SERVICE_UUID, _LOGGER
 
-
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     discovery_info: BluetoothServiceInfoBleak
